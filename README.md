@@ -1,4 +1,4 @@
-# claude-glasses-bridge
+# vision-claw
 
 Talk to Claude Code through Meta smart glasses. Ask a question out loud, show it what you're looking at, and hear the answer from Claude Code running on your own computer, with your projects, email and calendar.
 
@@ -38,7 +38,7 @@ There are two ways to wire it, both through [VisionClaw](https://github.com/Inte
 ## Quick start
 
 ```bash
-git clone https://github.com/raphaelshahrabani-alt/claude-glasses-bridge && cd claude-glasses-bridge
+git clone https://github.com/raphaelshahrabani-alt/vision-claw claude-glasses-bridge && cd claude-glasses-bridge
 bun install
 bun run token                      # creates ~/.claude-glasses-bridge/token and prints it
 

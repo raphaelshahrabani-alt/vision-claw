@@ -55,9 +55,11 @@ account you use on the Mac. When you see the prompt, type `/exit`.
 
 ```powershell
 cd $HOME
-git clone https://github.com/raphaelshahrabani-alt/claude-glasses-bridge
+git clone https://github.com/raphaelshahrabani-alt/vision-claw claude-glasses-bridge
 cd claude-glasses-bridge
 ```
+
+The last word in the `git clone` line names the folder `claude-glasses-bridge`, which the rest of this guide uses.
 
 **4. Run the setup**
 
