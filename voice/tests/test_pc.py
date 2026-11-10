@@ -22,6 +22,7 @@ import folders  # noqa: E402
 import glasses_cli  # noqa: E402
 import keys  # noqa: E402
 import launcher as launcher_mod  # noqa: E402
+import logsummary  # noqa: E402
 import pcdoctor  # noqa: E402
 import profile_setup  # noqa: E402
 import setup_pc  # noqa: E402
@@ -891,6 +892,36 @@ class ProfileTest(unittest.TestCase):
         profile_setup.run(self.path, ask=self.answers("r", *self.FULL), say=self.said.append)
         self.assertIn("- Acme Bakery:", self.path.read_text(encoding="utf-8"))
         self.assertEqual(self.path.with_name("persona.md.bak").read_text(encoding="utf-8"), "# mine\n- Name: Sam\n")
+
+
+class LogSummaryTest(unittest.TestCase):
+    def record(self, level, message, stamp="2026-11-05T21:00:36.663367+00:00"):
+        return json.dumps({"message": message, "level": level, "name": "livekit.agents", "timestamp": stamp})
+
+    def test_only_warnings_and_errors_in_short_lines_with_repeats_folded(self):
+        text = "\n".join([
+            self.record("INFO", "registered worker"),
+            "16:00:38 plain console line that is not json",
+            self.record("WARNING", 'event loop blocked for 230ms at "C:\\Python312\\Lib\\ssl.py", line 707, in create_default_context; '
+                                    "synchronous work on the agent loop delays audio and turn handling"),
+            self.record("ERROR", "tts failed, switching to the next voice", "2026-11-05T21:01:02.000000+00:00"),
+            self.record("ERROR", "tts failed, switching to the next voice", "2026-11-05T21:01:02.000000+00:00"),
+            self.record("ERROR", "x" * 400, "2026-11-05T21:01:09.000000+00:00"),
+        ])
+        lines = logsummary.problem_lines(text)
+        self.assertEqual(lines[0], "21:00:36Z WARN event loop blocked for 230ms in create_default_context")
+        self.assertEqual(lines[1], "21:01:02Z ERRO tts failed, switching to the next voice  (x2)")
+        self.assertTrue(lines[2].endswith("…") and len(lines[2]) < 200)
+        self.assertEqual(len(lines), 3)
+        self.assertEqual(logsummary.problem_lines(self.record("INFO", "all fine")), [])
+
+    def test_only_the_last_few_are_kept(self):
+        text = "\n".join(self.record("ERROR", f"problem {n}") for n in range(10))
+        self.assertEqual([line.split(" ", 2)[2] for line in logsummary.problem_lines(text, limit=3)],
+                         ["problem 7", "problem 8", "problem 9"])
+
+    def test_the_command_is_listed(self):
+        self.assertIn("glasses logs problems", glasses_cli.USAGE)
 
 
 class LiveKitTest(unittest.TestCase):

@@ -25,6 +25,7 @@ USAGE = """glasses: your Meta glasses assistant, on this PC
   glasses pick-voice          hear the voices and pick one
   glasses profile             tell it who you are and about your businesses (it asks questions)
   glasses logs [voice|console|gateway] [lines]  the end of a log (console shows start-up errors)
+  glasses logs problems [lines]  only the warnings and errors, one short line each
   glasses autostart on|off    keep it always on: start at sign-in, restart it if it stops, never sleep
 """
 
@@ -191,8 +192,19 @@ def main(argv: list[str]) -> int:
         name = rest[0] if rest else "voice"
         count = int(rest[1]) if len(rest) > 1 and rest[1].isdigit() else 40
         # voice: the voice program's own log; console: what it printed as it started, where start-up errors are
-        files = {"voice": "voice.log", "console": "voice-console.log", "gateway": "gateway.log"}
+        files = {"voice": "voice.log", "console": "voice-console.log", "gateway": "gateway.log",
+                 "problems": "voice-console.log"}
         log = default_data_dir() / files.get(name, f"{name}.log")
+        if name == "problems":
+            from logsummary import problem_lines
+
+            try:
+                found = problem_lines(log.read_text(encoding="utf-8", errors="replace"), limit=count)
+            except OSError:
+                print(f"No log yet at {log}")
+                return 0
+            print("\n".join(found) if found else "No warnings or errors in the log.")
+            return 0
         try:
             print("".join(log.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True)[-count:]))
         except OSError:

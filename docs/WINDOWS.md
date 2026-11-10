@@ -229,6 +229,15 @@ reach the PC, and runs a short live test. Anything wrong gets a ✗ and the fix.
   work in isn't there. Windows often keeps the Desktop inside OneDrive. `glasses start` now looks for
   it there and falls back to your home folder; use a folder that exists, for example
   `glasses start $HOME\Documents`.
+- **The voice lags, mumbles or is hard to understand:** first find out which part it is.
+  1. Take the glasses out of it: disconnect their Bluetooth in the iPhone's Settings and make a call on
+     the phone's own speaker. If it's clear there, the muffling comes from Bluetooth phone-call audio,
+     not from this software.
+  2. Make a call that mumbles, then on the PC run `glasses logs problems`. It lists only the warnings
+     and errors, one line each: a voice that failed and switched to the backup voice, "event loop
+     blocked" (the PC was too busy to keep up), or errors from LiveKit.
+  3. While on a call, open Task Manager (Ctrl+Shift+Esc) and look at CPU and Memory. Near 100% means the
+     PC is the bottleneck. If the PC is on Wi-Fi, a network cable helps a lot.
 - **Calls connect but it never answers:** `glasses logs`, and `glasses doctor`.
 - **Browser control doesn't work:** Chrome must be open, with the Claude extension signed in.
   Claude Code's Chrome control works on regular Windows, but **not** inside WSL, so don't run this
